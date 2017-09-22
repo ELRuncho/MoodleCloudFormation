@@ -1,6 +1,44 @@
 Parameters:
+	SnapshotToRestore:
+		Type: String
+		Default: ""
+		Description: Snapshot id to restore DB. leave blank if you are going to start a fresh install
+	EnvironmentSize:
+		Type: String
+		Default: SMALL
+		AllowedValues:
+			- SMALL
+			- MEDIUM
+			- LARGE
+		Description: Select and environment size (S,M,L) Large environments will deploy an aurora cluster
+	DatabaseName:
+		Type: String
+		Default: MoodleDB
+		MinLength: 8
+		MaxLength: 64
+		AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+	DatabaseUser:
+		Type: String
+		Default: moodledude
+		MinLength: 8
+		MaxLength: 16
+		AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+	DatabasePassword:
+		Type: String
+		Default: moodledudepassword
+		MinLength: 8
+		MaxLength: 41
+		NoEcho: true
+		AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric Characters only
 Conditions:
+	isLarge:
+		!Equals [!Ref EnvironmentSize, "LARGE"]
+	isntLarge:
+		!Not [!Equals [!Ref EnvironmentSize. "LARGE"]]
+	isRestore:
+		!Not [!Equals [!Ref SnapshotToRestore, ""]]
 Mappings:
+
 Resources:
   ELB:
      Type:
