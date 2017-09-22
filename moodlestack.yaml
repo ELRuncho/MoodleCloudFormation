@@ -2,7 +2,43 @@ Parameters:
 Conditions:
 Mappings:
 Resources:
+  ELB:
+     Type:
+     Properties:
+  EC2:
+     Type: "AWS::EC2::Instance"
+     Properties:
+	 ImageId:
+	 InstanceType:
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    DeletionPolicy: Snapshot
+    Properties:
+       AllocatedStorage: 5
+       StorageType: gp2
+       DBInstanceClass:
+       Engine: MySQL
+       MasterUserName:
+       MasterUserPassword:
+  DBAuroraCluster:
+	Type: "AWS::RDS::DBCluster"
+	DeletionPolicy: Snapshot
+	Condition:
+	Properties:
+		DataBaseName:
+		Engine: Aurora
+		MasterUserName:
+		MasterUserPassword:
+		SnapshotIdentifier:
+  DBAurora:
+	Type:
+	Condition:
+	Properties:
+		DBClusterIdentifier: !Ref DBAuroraCluster
+		Engine: Aurora
+		DBInstanceClass: !FinInMap [InstanceSize, !Ref Environmentsize, DB]
   S3:
     Type: "AWS::S3::Bucket"
     DeletionPolicy: Retain
 Outputs:
+	
