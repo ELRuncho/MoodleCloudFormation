@@ -39,38 +39,38 @@ Conditions:
 		!Not [!Equals [!Ref SnapshotToRestore, ""]]
 Mappings:
 	RegionMap:
-		us-east-1:
-      			"UBUNTU" : "ami-1d4e7a66" # Ubuntu Aug 2017
+        us-east-1:
+      			"UBUNTU" : "ami-3dec9947" # Ubuntu  2017
     		us-east-2:
-      			"UBUNTU" : "ami-dbbd9dbe" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-597d553c" # Ubuntu  2017
     		us-west-1:
-      			"UBUNTU" : "ami-969ab1f6" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-1a17137a" # Ubuntu  2017
     		us-west-2:
-      			"UBUNTU" : "ami-8803e0f0" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-a2e544da" # Ubuntu  2017
     		ca-central-1:
-      			"UBUNTU" : "ami-a9c27ccd" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-b0c67cd4" # Ubuntu  2017
     		eu-west-1:
-      			"UBUNTU" : "ami-674cbc1e" # Ubuntu Aug 2017
-	    	eu-central-1:
-      			"UBUNTU" : "ami-958128fa" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-63b0341a" # Ubuntu  2017
+        eu-central-1:
+      			"UBUNTU" : "ami-13b8337c" # Ubuntu  2017
     		eu-west-2:
-      			"UBUNTU" : "ami-03998867" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-22415846" # Ubuntu  2017
     		ap-southeast-1:
-      			"UBUNTU" : "ami-9f28b3fc" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-29aece55" # Ubuntu  2017
     		ap-southeast-2:
-      			"UBUNTU" : "ami-bb1901d8" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-9b8076f9" # Ubuntu  2017
     		ap-northeast-2:
-      			"UBUNTU" : "ami-536ab33d" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-5027813e" # Ubuntu  2017
     		ap-northeast-1:
-      			"UBUNTU" : "ami-0417e362" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-42ca4724" # Ubuntu  2017
     		ap-south-1:
-      			"UBUNTU" : "ami-df413bb0" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-84dc94eb" # Ubuntu  2017
     		sa-east-1:
-      			"UBUNTU" : "ami-a41869c8" # Ubuntu Aug 2017
+      			"UBUNTU" : "ami-8181c7ed" # Ubuntu  2017
 
 	InstanceSize:
-		SMALL:
-			"EC2": "t2.micro" 
+    SMALL:
+			"EC2": "t2.micro"
 			"DB" : "db.t2.micro"
 		MEDIUM:
 			"EC2": "t2.small"
@@ -118,4 +118,3 @@ Resources:
     Type: "AWS::S3::Bucket"
     DeletionPolicy: Retain
 Outputs:
-	
