@@ -1,3 +1,4 @@
+
 Parameters:
 	SnapshotToRestore:
 		Type: String
@@ -67,7 +68,6 @@ Mappings:
       			"UBUNTU" : "ami-84dc94eb" # Ubuntu  2017
     		sa-east-1:
       			"UBUNTU" : "ami-8181c7ed" # Ubuntu  2017
-
 	InstanceSize:
     SMALL:
 			"EC2": "t2.micro"
@@ -84,9 +84,29 @@ Resources:
      Properties:
   EC2:
      Type: "AWS::EC2::Instance"
+     DeletionPolicy: Delete
      Properties:
-	 ImageId:
-	 InstanceType:
+	       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", UBUNTU]
+	       InstanceType: !FindInMap [InstanceSize, !Ref EnvironmentSize, EC2]
+         KeyName: KeyName
+         UserData:
+          "Fn::Base64":
+            !Sub |
+             #!/bin/bash
+             sudo apt-get update -y  aws-cfn-bootstrap
+     CreationPolicy:
+       ResourcesSignal:
+        Count: "1"
+        Timeout: PT15M
+     Metadata:
+      configsets:
+        -"config_cfn"
+        -"install_moodle"
+        -"config_moodle"
+      config_cfn:
+      install_moodle:
+      config_moodle:
+
   DB:
     Type: "AWS::RDS::DBInstance"
     DeletionPolicy: Snapshot
@@ -98,19 +118,19 @@ Resources:
        MasterUserName:
        MasterUserPassword:
   DBAuroraCluster:
-	Type: "AWS::RDS::DBCluster"
-	DeletionPolicy: Snapshot
-	Condition:
-	Properties:
+	 Type: "AWS::RDS::DBCluster"
+	 DeletionPolicy: Snapshot
+	 Condition:
+	 Properties:
 		DataBaseName:
 		Engine: Aurora
 		MasterUserName:
 		MasterUserPassword:
 		SnapshotIdentifier:
   DBAurora:
-	Type:
-	Condition:
-	Properties:
+	 Type:
+	 Condition:
+	 Properties:
 		DBClusterIdentifier: !Ref DBAuroraCluster
 		Engine: Aurora
 		DBInstanceClass: !FinInMap [InstanceSize, !Ref Environmentsize, DB]
@@ -118,3 +138,4 @@ Resources:
     Type: "AWS::S3::Bucket"
     DeletionPolicy: Retain
 Outputs:
+
