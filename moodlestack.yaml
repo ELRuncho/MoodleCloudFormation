@@ -94,18 +94,59 @@ Resources:
             !Sub |
              #!/bin/bash
              sudo apt-get update -y  aws-cfn-bootstrap
+             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets moodle --region ${AWS::Region}
+             sudo apt-get update
      CreationPolicy:
        ResourcesSignal:
         Count: "1"
         Timeout: PT15M
      Metadata:
-      configsets:
-        -"config_cfn"
-        -"install_moodle"
-        -"config_moodle"
-      config_cfn:
-      install_moodle:
-      config_moodle:
+      AWS::CloudFormation::Init:
+        configsets:
+          moodle:
+            -"config_cfn"
+            -"install_moodle"
+            -"config_moodle"
+        config_cfn:
+          files:
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                trigger=post.update
+                path=Resources.EC2.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets wordpress --region ${AWS::Region}
+              mode: "000400"
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+               [main]
+               stack=${AWS::StackId}
+               region=${AWS::Region}
+               verbose=true
+               interval=5
+              mode: "000400"
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/etc/cfn/cfn-hup.conf"
+                  - "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+        install_moodle:
+          packages:
+            sudo:
+              apache: []
+              php: []
+              mysql: []
+              php-mysql: []
+
+            sources:
+              /var/www/html
+        config_moodle:
 
   DB:
     Type: "AWS::RDS::DBInstance"
@@ -113,7 +154,7 @@ Resources:
     Properties:
        AllocatedStorage: 5
        StorageType: gp2
-       DBInstanceClass:
+       DBInstanceClass: 
        Engine: MySQL
        MasterUserName:
        MasterUserPassword:
@@ -122,11 +163,11 @@ Resources:
 	 DeletionPolicy: Snapshot
 	 Condition:
 	 Properties:
-		DataBaseName:
+		DataBaseName: !Ref DataBaseName
 		Engine: Aurora
-		MasterUserName:
-		MasterUserPassword:
-		SnapshotIdentifier:
+		MasterUserName: !Ref DatabaseUser
+		MasterUserPassword: !Ref DatabasePassword
+		SnapshotIdentifier: !Ref SnapshotIdentifier
   DBAurora:
 	 Type:
 	 Condition:
@@ -138,4 +179,3 @@ Resources:
     Type: "AWS::S3::Bucket"
     DeletionPolicy: Retain
 Outputs:
-
