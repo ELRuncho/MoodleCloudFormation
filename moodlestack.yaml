@@ -96,6 +96,13 @@ Resources:
              sudo apt-get update -y  aws-cfn-bootstrap
              /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets moodle --region ${AWS::Region}
              sudo apt-get update
+             sudo apt-get install git-core
+             cd /opt
+             sudo git clone git://git.moodle.org/moodle.git
+             cd moodle
+             sudo git branch --track MOODLE_33_STABLE origin/MOODLE_33_STABLE
+             sudo git checkout MOODLE_33_STABLE
+             sudo cp -R /opt/moodle /var/www/html/
      CreationPolicy:
        ResourcesSignal:
         Count: "1"
@@ -139,13 +146,32 @@ Resources:
         install_moodle:
           packages:
             sudo:
-              apache: []
+              apache2: []
               php: []
-              mysql: []
+              mysql-server: []
+              mysql-client: []
               php-mysql: []
-
+              php-pspell: []
+              php-curl: []
+              php-gd: []
+              php-intl: []
+              php-xml: []
+              php-xmlrpc: []
+              php-ldap: []
+              php-zip: []
+              php-soap: []
+              php-mbstring: []
+              graphviz: []
+              aspell: []
+              ghostscript: []
+              clamav: []
             sources:
-              /var/www/html
+              /var/www/html: 
+            service:
+              apache2: 
+                enabled: true
+                ensureRunning: true
+
         config_moodle:
 
   DB:
