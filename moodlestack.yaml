@@ -165,14 +165,37 @@ Resources:
               aspell: []
               ghostscript: []
               clamav: []
-            sources:
-              /var/www/html: 
             service:
               apache2: 
                 enabled: true
                 ensureRunning: true
-
         config_moodle:
+          commands:
+            01_clone_config:
+              cwd: "var/www/html/moodle"
+              test: "test ! -e /var/www/html/moodle/config.php"
+              command: "cp config-dist.php config.php"
+            02_inject_dbhost:
+              cwd: "var/www/html/moodle"
+              command: !Sub |
+                sed -i 's/localhost/${DB.Endpoint.Address}/g' config.php
+            03_inject_dbname:
+              cwd: "var/www/html/moodle"
+              command: !Sub |
+                sed -i 's/moodle/${DatabaseName}/g' config.php
+            04_inject_dbuser:
+              cwd: "var/www/html/moodle"
+              command: !Sub |
+                sed -i 's/username/${DatabaseUser}/g' config.php
+            05_inject_dbpassword:
+              cwd: "var/www/html/moodle"
+              command: !Sub |
+                sed -i 's/password/${DatabasePassword}/g' config.php
+            06_set_dbtype:
+              cwd: "var/www/html/moodle"
+              command: !Sub |
+                sed -i 's/pgsql/mysqli/g' config.php
+
 
   DB:
     Type: "AWS::RDS::DBInstance"
@@ -182,8 +205,8 @@ Resources:
        StorageType: gp2
        DBInstanceClass: 
        Engine: MySQL
-       MasterUserName:
-       MasterUserPassword:
+       MasterUserName: !Ref DatabaseUser
+       MasterUserPassword: !Ref DatabasePassword
   DBAuroraCluster:
 	 Type: "AWS::RDS::DBCluster"
 	 DeletionPolicy: Snapshot
