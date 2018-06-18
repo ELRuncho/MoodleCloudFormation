@@ -1,0 +1,159 @@
+Parameters:
+  SnapshotToRestore:
+    Type: String
+    Default: ""
+    Description: Snapshot id to restore DB. leave blank if you are going to start a fresh install
+  EnvironmentSize:
+    Type: String
+    Default: SMALL
+    AllowedValues:
+      - SMALL
+      - MEDIUM
+      - LARGE
+    Description: Select and environment size (S,M,L) Large environments will deploy an aurora cluster
+  DatabaseName:
+    Type: String
+    Default: MoodleDB
+    MinLength: 8
+    MaxLength: 64
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+  DatabaseUser:
+    Type: String
+    Default: moodledude
+    MinLength: 8
+    MaxLength: 16
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+  DatabasePassword:
+    Type: String
+    Default: moodledudepassword
+    MinLength: 8
+    MaxLength: 41
+    NoEcho: true
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric Characters only
+  KeyPair:
+    Type: String
+    Default: ""
+    Description: Select the Name of the Key Pair you whant to use for EC2
+Conditions:
+  isLarge:
+    !Equals [!Ref EnvironmentSize, "LARGE"]
+  isntLarge:
+    !Not [!Equals [!Ref EnvironmentSize, "LARGE"]]
+  isRestore:
+    !Not [!Equals [!Ref SnapshotToRestore, ""]]
+Mappings:
+  RegionMap:
+    us-east-1:
+      "UBUNTU" : "ami-3dec9947" # Ubuntu  2017
+    us-east-2:
+      "UBUNTU" : "ami-597d553c" # Ubuntu  2017
+    us-west-1:
+      "UBUNTU" : "ami-1a17137a" # Ubuntu  2017
+    us-west-2:
+      "UBUNTU" : "ami-a2e544da" # Ubuntu  2017
+    ca-central-1:
+      "UBUNTU" : "ami-b0c67cd4" # Ubuntu  2017
+    eu-west-1:
+      "UBUNTU" : "ami-63b0341a" # Ubuntu  2017
+    eu-central-1:
+      "UBUNTU" : "ami-13b8337c" # Ubuntu  2017
+    eu-west-2:
+      "UBUNTU" : "ami-22415846" # Ubuntu  2017
+    ap-southeast-1:
+      "UBUNTU" : "ami-29aece55" # Ubuntu  2017
+    ap-southeast-2:
+      "UBUNTU" : "ami-9b8076f9" # Ubuntu  2017
+    ap-northeast-2:
+      "UBUNTU" : "ami-5027813e" # Ubuntu  2017
+    ap-northeast-1:
+      "UBUNTU" : "ami-42ca4724" # Ubuntu  2017
+    ap-south-1:
+      "UBUNTU" : "ami-84dc94eb" # Ubuntu  2017
+    sa-east-1:
+      "UBUNTU" : "ami-8181c7ed" # Ubuntu  2017
+  InstanceSize:
+    SMALL:
+      "EC2": "t2.micro"
+      "DB" : "db.t2.micro"
+    MEDIUM:
+      "EC2": "t2.small"
+      "DB" : "db.t2.small"
+    LARGE:
+      "EC2": "t2.medium"
+      "DB" : "db.r3.xlarge"
+Resources:
+  EC2:
+    Type: "AWS::EC2::Instance"
+    DeletionPolicy: Delete
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", UBUNTU]
+      InstanceType: !FindInMap [InstanceSize, !Ref EnvironmentSize, EC2]
+      KeyName: !Ref KeyPair
+      UserData:
+        "Fn::Base64":
+          !Sub |
+            #!/bin/bash
+            sudo apt-get update  aws-cfn-bootstrap -y
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets moodle --region ${AWS::Region}
+            sudo apt-get -y update
+            sudo apt-get install -y git-core
+            sudo apt-get install -y vim
+            sudo apt-get -y update
+            sudo apt-get install -y apache2 mysql-client php7.0 libapache2-mod-php7.0
+            sudo apt-get install -y graphviz aspell ghostscript clamav php7.0-pspell php7.0-curl php7.0-gd php7.0-intl php7.0-mysql php7.0-xml php7.0-xmlrpc php7.0-ldap php7.0-zip php7.0-soap php7.0-mbstring
+            sudo service apache2 restart
+            cd /opt
+            sudo git clone git://git.moodle.org/moodle.git
+            cd moodle
+            sudo git branch --track MOODLE_33_STABLE origin/MOODLE_33_STABLE
+            sudo git checkout MOODLE_33_STABLE
+            sudo cp -R /opt/moodle /var/www/html/
+            sudo mkdir /var/moodledata
+            sudo chown -R www-data /var/moodledata
+            sudo chmod -R 777 /var/moodledata
+            sudo chmod -R 777 /var/www/html/moodle
+            cd /var/www/html/moodle
+            cp config-dist.php config.php
+            sed -i 's/pgsql/mysqli/g' config.php
+            sed -i 's/moodle/${DatabaseName}/g' config.php
+            sed -i 's/localhost/${DB.Endpoint.Address}/g' config.php
+            sed -i 's/username/${DatabaseUser}/g' config.php
+            sed -i 's/password/${DatabasePassword}/g' config.php
+            sudo chmod -R 0755 /var/www/html/moodle
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    Condition: isntLarge 
+    DeletionPolicy: Snapshot
+    Properties:
+       AllocatedStorage: 5
+       StorageType: gp2
+       DBInstanceClass: !FindInMap [InstanceSize,!Ref EnvironmentSize, DB]
+       DBName: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseName]
+       Engine: MySQL
+       MasterUsername: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseUser]
+       MasterUserPassword: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabasePassword]
+       DBSnapshotIdentifier: !If [isRestore, !Ref SnapshotToRestore, !Ref "AWS::NoValue"]
+  DBAuroraCluster:
+    Type: "AWS::RDS::DBCluster"
+    DeletionPolicy: Snapshot
+    Condition: isLarge
+    Properties:
+      DataBaseName: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseName]
+      Engine: Aurora
+      MasterUsername: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseUser]
+      MasterUserPassword: !If [isRestore,!Ref "AWS::NoValue", !Ref DatabasePassword]
+      SnapshotIdentifier: !If [isRestore, !Ref SnapshotToRestore, !Ref "AWS::NoValue"]
+  DBAurora:
+    Type: "AWS::RDS::DBInstance"
+    Condition: isLarge
+    Properties:
+      DBClusterIdentifier: !Ref DBAuroraCluster
+      Engine: aurora
+      DBInstanceClass: !FindInMap [InstanceSize, !Ref EnvironmentSize, DB]
+  S3:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Delete
+Outputs:
+  moodleroot:
+    Description: Access URL for Moodle
+    Value: !Join ["", ["http//", !GetAtt EC2.PublicIp, "/moodle"]]

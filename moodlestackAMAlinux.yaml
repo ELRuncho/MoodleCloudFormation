@@ -1,0 +1,187 @@
+Parameters:
+  SnapshotToRestore:
+    Type: String
+    Default: ""
+    Description: Snapshot id to restore DB. leave blank if you are going to start a fresh install
+  EnvironmentSize:
+    Type: String
+    Default: SMALL
+    AllowedValues:
+      - SMALL
+      - MEDIUM
+      - LARGE
+    Description: Select and environment size (S,M,L) Large environments will deploy an aurora cluster
+  DatabaseName:
+    Type: String
+    Default: MoodleDB
+    MinLength: 8
+    MaxLength: 64
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+  DatabaseUser:
+    Type: String
+    Default: moodledude
+    MinLength: 8
+    MaxLength: 16
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric characters only
+  DatabasePassword:
+    Type: String
+    Default: moodledudepassword
+    MinLength: 8
+    MaxLength: 41
+    NoEcho: true
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*" # Start with a letter, alphanumeric Characters only
+  KeyPair:
+    Type: String
+    Default: ""
+    Description: Select the Name of the Key Pair you whant to use for EC2
+Conditions:
+  isLarge:
+    !Equals [!Ref EnvironmentSize, "LARGE"]
+  isntLarge:
+    !Not [!Equals [!Ref EnvironmentSize, "LARGE"]]
+  isRestore:
+    !Not [!Equals [!Ref SnapshotToRestore, ""]]
+Mappings:
+  RegionMap:
+    us-east-1:
+      "AMALINUX" : "ami-c481fad3" # AMALINUX SEP 2016
+    us-east-2:
+      "AMALINUX" : "ami-71ca9114" # AMALINUX SEP 2016
+    us-west-1:
+      "AMALINUX" : "ami-de347abe" # AMALINUX SEP 2016
+    us-west-2:
+      "AMALINUX" : "ami-b04e92d0" # AMALINUX SEP 2016
+    ca-central-1:
+      "AMALINUX" : "ami-eb20928f" # AMALINUX SEP 2016 v01
+    eu-west-1:
+      "AMALINUX" : "ami-d41d58a7" # AMALINUX SEP 2016
+    eu-central-1:
+      "AMALINUX" : "ami-0044b96f" # AMALINUX SEP 2016
+    eu-west-2:
+      "AMALINUX" : "ami-bfe0eadb" # AMALINUX SEP 2016 v01
+    ap-southeast-1:
+      "AMALINUX" : "ami-7243e611" # AMALINUX SEP 2016
+    ap-southeast-2:
+      "AMALINUX" : "ami-55d4e436" # AMALINUX SEP 2016
+    ap-northeast-2:
+      "AMALINUX" : "ami-a04297ce" # AMALINUX SEP 2016
+    ap-northeast-1:
+      "AMALINUX" : "ami-1a15c77b" # AMALINUX SEP 2016
+    ap-south-1:
+      "AMALINUX" : "ami-cacbbea5" # AMALINUX SEP 2016
+    sa-east-1:
+      "AMALINUX" : "ami-b777e4db" # AMALINUX SEP 2016
+  InstanceSize:
+    SMALL:
+      "EC2": "t2.micro"
+      "DB" : "db.t2.micro"
+    MEDIUM:
+      "EC2": "t2.small"
+      "DB" : "db.t2.small"
+    LARGE:
+      "EC2": "t2.medium"
+      "DB" : "db.r3.xlarge"
+Resources:
+  EC2:
+    Type: "AWS::EC2::Instance"
+    DeletionPolicy: Delete
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMALINUX]
+      InstanceType: !FindInMap [InstanceSize, !Ref EnvironmentSize, EC2]
+      KeyName: !Ref KeyPair
+      UserData:
+        "Fn::Base64":
+          !Sub |
+            #!/bin/bash
+            yum update -y 
+            yum install aws-cfn-bootstrap -y
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets moodle --region ${AWS::Region}
+            yum -y update
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource EC2 --region ${AWS::Region}
+    CreationPolicy:
+       ResourceSignal:
+        Count: "1"
+        Timeout: PT30M
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          moodle:
+            - "config_cfn"
+            - "install_moodle"
+        config_cfn:
+          files:
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.EC2.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets moodle --region ${AWS::Region}
+                runas=root
+              mode: "000400"
+              owner: root
+              group: root
+            /etc/cfn/cfn-hup.conf:
+              content: !Sub |
+                [main]
+                stack=${AWS::StackId}
+                region=${AWS::Region}
+                verbose=true
+                interval=5
+              mode: "000400"
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: "true"
+                ensureRunning: "true"
+                files:
+                  - "/etc/cfn/cfn-hup.conf"
+                  - "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+        install_moodle:
+          packages:
+            yum:
+              httpd: []
+              php: []
+              php-mysql: []
+          services:
+            httpd: 
+              enabled: "true"
+              ensureRunning: "true"
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    Condition: isntLarge 
+    DeletionPolicy: Snapshot
+    Properties:
+       AllocatedStorage: 5
+       StorageType: gp2
+       DBInstanceClass: !FindInMap [InstanceSize,!Ref EnvironmentSize, DB]
+       DBName: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseName]
+       Engine: MySQL
+       MasterUsername: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseUser]
+       MasterUserPassword: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabasePassword]
+       DBSnapshotIdentifier: !If [isRestore, !Ref SnapshotToRestore, !Ref "AWS::NoValue"]
+  DBAuroraCluster:
+    Type: "AWS::RDS::DBCluster"
+    DeletionPolicy: Snapshot
+    Condition: isLarge
+    Properties:
+      DataBaseName: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseName]
+      Engine: Aurora
+      MasterUsername: !If [isRestore, !Ref "AWS::NoValue", !Ref DatabaseUser]
+      MasterUserPassword: !If [isRestore,!Ref "AWS::NoValue", !Ref DatabasePassword]
+      SnapshotIdentifier: !If [isRestore, !Ref SnapshotToRestore, !Ref "AWS::NoValue"]
+  DBAurora:
+    Type: "AWS::RDS::DBInstance"
+    Condition: isLarge
+    Properties:
+      DBClusterIdentifier: !Ref DBAuroraCluster
+      Engine: aurora
+      DBInstanceClass: !FindInMap [InstanceSize, !Ref EnvironmentSize, DB]
+  S3:
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: Delete
+Outputs:
+  moodleroot:
+    Description: Access URL for Moodle
+    Value: !Join ["", ["http://", !GetAtt EC2.PublicIp]]
