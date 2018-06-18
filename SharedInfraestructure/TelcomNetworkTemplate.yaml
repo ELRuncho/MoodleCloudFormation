@@ -1,2 +1,10 @@
 Parameters:
-	
+	vpcidr:
+    Type: String
+    Minlength: 9
+    Maxlength: 18
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstrainDescription: Use a valid range in the form x.x.x.x/16
+  sharedcidrA:
+    Type: String
+  sharedcidrB:
