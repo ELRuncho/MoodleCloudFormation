@@ -32,4 +32,18 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       InternetGateWayId: !Ref IGW
+  PublicSharedSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs ]
+      CidrBlock: !Ref sharedcidrA
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
+  PublicSharedSubnetB:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs ]
+      CidrBlock: !Ref sharedcidrB
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
 Outputs:
