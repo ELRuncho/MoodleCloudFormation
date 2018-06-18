@@ -27,4 +27,9 @@ Resources:
       CidrBlock: !Ref vpcidr
   IGW:
     Type: "AWS::EC2::InternateGateway"
+  GatewayAttach:
+    Type: "AWS::VPC::VPCGateWayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGateWayId: !Ref IGW
 Outputs:
