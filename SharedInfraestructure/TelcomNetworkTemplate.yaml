@@ -46,4 +46,14 @@ Resources:
       CidrBlock: !Ref sharedcidrB
       MapPublicIpOnLaunch: true
       VpcId: !Ref VPC
+  RTAsociationPSubnetA:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      SubnetId: !Ref PublicSharedSubnetA
+  RTAsociationPSubnetB:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      SubnetId: !Ref PublicSharedSubnetB   
 Outputs:
