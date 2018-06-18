@@ -1,5 +1,5 @@
 Parameters:
-	vpcidr:
+  vpcidr:
     Type: String
     Minlength: 9
     Maxlength: 18
