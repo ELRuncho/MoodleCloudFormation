@@ -81,6 +81,8 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref VPC
-  RouteTablePrivate:
-    
+  PrivatToPublicACL:
+    Type: "AWS::EC2::NetworkAcl"
+    Properties: 
+      VpcId: !Ref VPC
 Outputs:
