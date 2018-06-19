@@ -60,6 +60,18 @@ Resources:
       CidrBlock: !Ref publicSNcidrB
       MapPublicIpOnLaunch: true
       VpcId: !Ref VPC
+  PrivateSharedSubnetA:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs ]
+      CidrBlock: !Ref privateSNcidrA
+      VpcId: !Ref VPC
+  PrivateSharedSubnetB:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: !Select [1, !GetAZs ]
+      CidrBlock: !Ref privateSNcidrB
+      VpcId: !Ref VPC
   RTAsociationPSubnetA:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
@@ -81,8 +93,13 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref VPC
-  PrivatToPublicACL:
+  PrivateAToPublicaACL:
     Type: "AWS::EC2::NetworkAcl"
     Properties: 
       VpcId: !Ref VPC
+  AclAAssociation:
+    Type: "AWS::EC2::SubnetNetworkAclAssociation"
+    Properties:
+      SubnetId: !Ref 
+      NetworkAclId:
 Outputs:
