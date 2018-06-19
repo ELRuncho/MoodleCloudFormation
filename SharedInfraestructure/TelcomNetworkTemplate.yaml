@@ -102,3 +102,4 @@ Resources:
     Properties:
       SubnetId: !Ref 
       NetworkAclId: !Ref PrivateAToPublicaACL
+Outputs:
