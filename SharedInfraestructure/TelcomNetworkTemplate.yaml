@@ -90,3 +90,6 @@ Outputs:
   RouteTablePublic:
     Description: ID for the public Route Table
     Value: !Ref RouteTablePublic
+  BucketURL:
+    Description: Shared Bucket for all possible environments
+    Value: !Ref S3DataBucket
