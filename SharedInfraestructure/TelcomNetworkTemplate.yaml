@@ -49,8 +49,7 @@ Resources:
             Resource: !Join ["", ["arn:aws:s3:::", !Ref S3DataBucket, "/*"]]
             Principal:
               AWS:
-                -"*"
-
+                - "*"
   GatewayAttach:
     Type: "AWS::EC2::VPCGatewayAttachment"
     Properties:
