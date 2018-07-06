@@ -26,7 +26,7 @@ Resources:
     Properties:
       CidrBlock: !Ref vpcidr
   IGW:
-    Type: "AWS::EC2::InternateGateway"
+    Type: "AWS::EC2::InternetGateway"
   S3DataBucket:
     DeletionPolicy: Retain
     Type: "AWS::S3::Bucket"
@@ -43,11 +43,19 @@ Resources:
         Statement:
           -
             Sid: "ABC123"
+            Action:
+              - "s3:GetObject"
+            Effect: Allow
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref S3DataBucket, "/*"]]
+            Principal:
+              AWS:
+                -"*"
+
   GatewayAttach:
-    Type: "AWS::VPC::VPCGateWayAttachment"
+    Type: "AWS::EC2::VPCGatewayAttachment"
     Properties:
       VpcId: !Ref VPC
-      InternetGateWayId: !Ref IGW
+      InternetGatewayId: !Ref IGW
   PublicSharedSubnetA:
     Type: "AWS::EC2::Subnet"
     Properties:
@@ -76,8 +84,8 @@ Resources:
     Type: "AWS::EC2::Route"
     DependsOn: GatewayAttach
     Properties:
-      Destination: 0.0.0.0/0
-      GatewayId: IGW
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
       RouteTableId: !Ref RouteTablePublic
   RouteTablePublic:
     Type: "AWS::EC2::RouteTable"
