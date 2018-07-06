@@ -12,28 +12,14 @@ Parameters:
     MaxLength: 18
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: Use a valid CIDR range in the form x.x.x.x/24
-    Default: 10.20.0.0/24
+    Default: 10.20.0.0/22
   publicSNcidrB:
     Type: String
     MinLength: 9
     MaxLength: 18
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/24
-    Default: 10.20.3.0/24
-  privateSNcidrA:
-    Type: String
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Use a valid CIDR range in the form x.x.x.x/24
-    Default: 10.20.2.0/24
-  privateSNcidrB:
-    Type: String
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Use a valid CIDR range in the form x.x.x.x/24
-    Default: 10.20.4.0/24
+    Default: 10.20.4.0/22
 Resources:
   VPC:
     Type: "AWS::EC2::VPC"
@@ -41,6 +27,22 @@ Resources:
       CidrBlock: !Ref vpcidr
   IGW:
     Type: "AWS::EC2::InternateGateway"
+  S3DataBucket:
+    DeletionPolicy: Retain
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        ErrorDocument: index.html
+        IndexDocument: index.html
+  BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref S3DataBucket
+      PolicyDocument:
+        Statement:
+          -
+            Sid: "ABC123"
   GatewayAttach:
     Type: "AWS::VPC::VPCGateWayAttachment"
     Properties:
@@ -59,18 +61,6 @@ Resources:
       AvailabilityZone: !Select [1, !GetAZs ]
       CidrBlock: !Ref publicSNcidrB
       MapPublicIpOnLaunch: true
-      VpcId: !Ref VPC
-  PrivateSharedSubnetA:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      AvailabilityZone: !Select [0, !GetAZs ]
-      CidrBlock: !Ref privateSNcidrA
-      VpcId: !Ref VPC
-  PrivateSharedSubnetB:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      AvailabilityZone: !Select [1, !GetAZs ]
-      CidrBlock: !Ref privateSNcidrB
       VpcId: !Ref VPC
   RTAsociationPSubnetA:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
@@ -93,13 +83,10 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref VPC
-  PrivateAToPublicaACL:
-    Type: "AWS::EC2::NetworkAcl"
-    Properties: 
-      VpcId: !Ref VPC
-  AclAAssociation:
-    Type: "AWS::EC2::SubnetNetworkAclAssociation"
-    Properties:
-      SubnetId: !Ref 
-      NetworkAclId: !Ref PrivateAToPublicaACL
 Outputs:
+  vpcid:
+    Description: ID for Shared VPC
+    Value: !Ref VPC
+  RouteTablePublic:
+    Description: ID for the public Route Table
+    Value: !Ref RouteTablePublic
