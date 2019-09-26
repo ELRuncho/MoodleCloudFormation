@@ -1,0 +1,20 @@
+!AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This template can create different moodle deployments from a LAMP server, a two tier deployement, or a highly available, elastic, and scalable Moodle environment on AWS.
+Parameters:
+  
+Metadata:
+  
+Mappings:
+  
+Conditions:
+  
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    TemplateUrl: /Network
+    Properties:
+      Parameters:
+        EnvName: ${AWS::StackName}
+  
+Outputs:
