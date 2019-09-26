@@ -18,7 +18,97 @@ Parameters:
     Description: The allowed tenancy of instances launched into the VPC
     Type: String
 
+  PublicSubnet0CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.10.0/24
   
+  PublicSubnet1CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.11.0/24
+  
+  PublicSubnet2CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.12.0/24
+  
+  PublicSubnet3CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.13.0/24
+  
+  PublicSubnet4CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.14.0/24
+  
+  PublicSubnet5CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.15.0/24
+
+  WebSubnet0CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.20.0/24
+  
+  WebSubnet1CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.21.0/24
+
+  WebSubnet2CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.22.0/24
+  
+  WebSubnet3CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.23.0/24
+  
+  WebSubnet4CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.24.0/24
+
+  WebSubnet5CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.25.0/24
+
+  DataSubnet0CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.30.0/24
+  
+  DataSubnet1CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.31.0/24
+  
+  DataSubnet2CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.32.0/24
+  
+  DataSubnet3CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.33.0/24
+  
+  DataSubnet4CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.34.0/24
+  
+  DataSubnet5CIDR:
+    AllowedPatern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range Within the VPC CIDR
+    Default: 10.20.35.0/24
+
+
 Resources:
   
 Outputs:
