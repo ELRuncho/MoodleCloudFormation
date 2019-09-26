@@ -2,17 +2,36 @@
 Description: |
   This template can create different moodle deployments from a LAMP server, a two tier deployement, or a highly available, elastic, and scalable Moodle environment on AWS.
 Parameters:
+  EnvironmentSize:
+    Type: String
+    Default: LAMP
+    AllowedValues:
+      - LAMP
+      - TwoTier
+      - HighAvailability
+    Description: Select a deployment type. The HoghAvalability will deploy an aurora cluster
+
+  BastionInstanceType:
+    AllowedValues:
+      - t2.micro 
+      - t2.small 
+      - t2.medium
+    ConstrainDescription: Bastion size
+    Description: Bastion EC2 instance for use with TwoTier and HA deployements only
+    Type: String
   
+  
+
 Metadata:
   
 Mappings:
   
 Conditions:
   
-Resources:
   
+Resources:
 
-  VPC:
+  SharedInf:
     Type: AWS::CloudFormation::Stack
     TemplateUrl: /Network
     Properties:

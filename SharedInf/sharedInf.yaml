@@ -1,0 +1,24 @@
+!AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This template creates the basis infraestructure for our deployements, VPC, subnets, buckets etc
+Parameters:
+  Vpccidr:
+   Type:
+   MinLength: 9
+   MaxLength: 18
+   AllowedPattern: "(\\d{1.3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+   ConstraintDescription: Must be a Valid CIDR range from x.x.x.x/16
+   Default: 10.20.0.0/16
+  
+  VpcTenancy:
+    AllowedValues:
+    - default
+    - dedicated
+    Default: default
+    Description: The allowed tenancy of instances launched into the VPC
+    Type: String
+
+  
+Resources:
+  
+Outputs:
