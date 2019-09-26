@@ -10,6 +10,8 @@ Mappings:
 Conditions:
   
 Resources:
+  
+
   VPC:
     Type: AWS::CloudFormation::Stack
     TemplateUrl: /Network
