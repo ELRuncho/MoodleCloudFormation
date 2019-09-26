@@ -2,6 +2,24 @@
 Description: |
   This template creates the basis infraestructure for our deployements, VPC, subnets, buckets etc
 Parameters:
+
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved.'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+
+  NumberOfAZs:
+    AllowedValues:
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    Default: 3
+    Description: Number of Availability Zones to use in the VPC. This must match your
+      selections in the list of Availability Zones parameter.
+    Type: Number
+
   Vpccidr:
    Type:
    MinLength: 9
